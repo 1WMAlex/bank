@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crypto Wallet</title>
+    <style>
+        :root {
+            --blue-500: #3b82f6;
+            --blue-600: #2563eb;
+            --gray-50: #f9fafb;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --green-500: #22c55e;
+            --red-500: #ef4444;
+            --yellow-500: #eab308;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+            transition: background-color 0.3s;
+        }
+
+        body.dark {
+            background-color: var(--gray-900);
+            color: white;
+        }
+
+        .navbar {
+            border-bottom: 1px solid var(--gray-200);
+            padding: 0 1rem;
+        }
+
+        .dark .navbar {
+            border-color: var(--gray-700);
+        }
+
+        .nav-content {
+            max-width: 80rem;
+            margin: 0 auto;
+            height: 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .container {
+            max-width: 28rem;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .dark .card {
+            background: var(--gray-800);
+        }
+
+        .card-header {
+            padding: 1rem 1rem 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .card-content {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .holdings {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+
+        .dark .holdings {
+            color: var(--gray-400);
+        }
+
+        .buy-button {
+            background: var(--blue-500);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+        }
+
+        .buy-button:hover {
+            background: var(--blue-600);
+        }
+        .token-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .dark .modal-content {
+            background: var(--gray-800);
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 0.375rem;
+            background: white;
+        }
+
+        .dark .input-group input {
+            background: var(--gray-900);
+            border-color: var(--gray-700);
+            color: white;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .cancel-button {
+            background: var(--gray-500);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="brand">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8V7a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v8a4 4 0 0 0 4 4h8a4 4 0 0 0 4-4v-1M12 8h8M12 12h8M12 16h8"/>
+                </svg>
+                <span>Crypto Wallet</span>
+            </div>
+            <button class="theme-toggle" id="themeToggle">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="themeIcon">
+                    <circle cx="12" cy="12" r="5"/>
+                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+    <div class="modal" id="buyModal">
+        <div class="modal-content">
+            <h2 style="margin-top: 0;">Buy Token</h2>
+            <div class="input-group">
+                <label>Amount in USD</label>
+                <input type="number" id="usdAmount" min="0" step="0.01">
+            </div>
+            <div class="input-group">
+                <label>Amount in Tokens</label>
+                <input type="number" id="tokenAmount" min="0" step="0.000001">
+            </div>
+            <div class="modal-buttons">
+                <button class="cancel-button" onclick="closeModal()">Cancel</button>
+                <button class="buy-button" onclick="confirmPurchase()">Confirm</button>
+            </div>
+        </div>
+    </div>
+    <div class="container" id="tokenContainer"></div>
+
+    <script>
+const tokens = [
+    { 
+        id: 'daddy', 
+        name: 'DADDY', 
+        initialPrice: 0.72,
+        icon: 'https://s2.coinmarketcap.com/static/img/coins/64x64/31830.png'
+    },
+    { 
+        id: 'nbt', 
+        name: 'Nigga Butt Token', 
+        initialPrice: 0.005089,
+        icon: 'https://static.coinstats.app/coins/8fZL148nnC168RAVCZh4PkjvMZmxMEfMLDhoziWVPnqf_solanaSL6.png'
+    },
+    { 
+        id: 'sol', 
+        name: 'Solana', 
+        initialPrice: 235.45,
+        icon: 'https://cryptologos.cc/logos/solana-sol-logo.png'
+    }
+];
+
+let prices = JSON.parse(localStorage.getItem('cryptoPrices')) || 
+    tokens.reduce((acc, token) => ({...acc, [token.id]: token.initialPrice}), {});
+
+let holdings = JSON.parse(localStorage.getItem('cryptoHoldings')) || 
+    tokens.reduce((acc, token) => ({...acc, [token.id]: 0}), {});
+
+let selectedToken = null;
+
+const darkMode = JSON.parse(localStorage.getItem('darkMode') || 'true');
+document.body.classList.toggle('dark', darkMode);
+updateThemeIcon();
+
+function updateThemeIcon() {
+    const isDark = document.body.classList.contains('dark');
+    document.getElementById('themeIcon').innerHTML = isDark ? 
+        '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>' :
+        '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+}
+
+function openBuyModal(tokenId) {
+    selectedToken = tokenId;
+    document.getElementById('buyModal').style.display = 'block';
+    document.getElementById('usdAmount').value = '';
+    document.getElementById('tokenAmount').value = '';
+}
+
+function closeModal() {
+    document.getElementById('buyModal').style.display = 'none';
+}
+
+function updateTokenAmount() {
+    const usdAmount = parseFloat(document.getElementById('usdAmount').value);
+    if (!isNaN(usdAmount)) {
+        const tokenAmount = usdAmount / prices[selectedToken];
+        document.getElementById('tokenAmount').value = tokenAmount.toFixed(6);
+    }
+}
+
+function updateUsdAmount() {
+    const tokenAmount = parseFloat(document.getElementById('tokenAmount').value);
+    if (!isNaN(tokenAmount)) {
+        const usdAmount = tokenAmount * prices[selectedToken];
+        document.getElementById('usdAmount').value = usdAmount.toFixed(2);
+    }
+}
+
+let initialHoldings = JSON.parse(localStorage.getItem('initialHoldings')) || 
+    tokens.reduce((acc, token) => ({...acc, [token.id]: {amount: 0, value: 0}}), {});
+
+function confirmPurchase() {
+    const tokenAmount = parseFloat(document.getElementById('tokenAmount').value);
+    const usdAmount = parseFloat(document.getElementById('usdAmount').value);
+    
+    if (!isNaN(tokenAmount) && tokenAmount > 0) {
+        holdings[selectedToken] += tokenAmount;
+        initialHoldings[selectedToken].amount += tokenAmount;
+        initialHoldings[selectedToken].value += usdAmount;
+        
+        localStorage.setItem('cryptoHoldings', JSON.stringify(holdings));
+        localStorage.setItem('initialHoldings', JSON.stringify(initialHoldings));
+        closeModal();
+        renderTokens();
+    }
+}
+
+function calculateGains(token) {
+    const currentValue = holdings[token] * prices[token];
+    const initialValue = initialHoldings[token].value;
+    const gainUSD = currentValue - initialValue;
+    const gainPercent = initialValue > 0 ? ((gainUSD / initialValue) * 100) : 0;
+    return { usd: gainUSD, percent: gainPercent };
+}
+
+function renderTokens() {
+    const container = document.getElementById('tokenContainer');
+    container.innerHTML = tokens.map(token => {
+        const gains = calculateGains(token.id);
+        const isPositive = gains.usd >= 0;
+        
+        return `
+        <div class="card">
+            <div class="card-header">
+                <div style="display: flex; align-items: center;">
+                    <img src="${token.icon}" class="token-icon" alt="${token.name}">
+                    <span class="card-title">${token.name}</span>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                    style="color: ${prices[token.id] > token.initialPrice ? 'var(--green-500)' : 'var(--red-500)'}">
+                    ${prices[token.id] > token.initialPrice ? 
+                        '<polyline points="5 15 12 8 19 15"/>' : 
+                        '<polyline points="19 9 12 16 5 9"/>'}
+                </svg>
+            </div>
+            <div class="card-content">
+                <div>
+                    <div class="price">$${prices[token.id].toFixed(2)}</div>
+                    <div class="holdings">Holdings: ${holdings[token.id].toFixed(6)}</div>
+                    <div class="gains" style="color: ${isPositive ? 'var(--green-500)' : 'var(--red-500)'}">
+                        ${isPositive ? '+' : ''}$${gains.usd.toFixed(2)} (${isPositive ? '+' : ''}${gains.percent.toFixed(2)}%)
+                    </div>
+                </div>
+                <button class="buy-button" onclick="openBuyModal('${token.id}')">Buy</button>
+            </div>
+        </div>
+    `}).join('');
+}
+
+document.getElementById('themeToggle').addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+    localStorage.setItem('darkMode', document.body.classList.contains('dark'));
+    updateThemeIcon();
+});
+
+document.getElementById('usdAmount').addEventListener('input', updateTokenAmount);
+document.getElementById('tokenAmount').addEventListener('input', updateUsdAmount);
+
+setInterval(() => {
+    prices = tokens.reduce((acc, token) => ({
+        ...acc,
+        [token.id]: prices[token.id] * (1 + (Math.random() - 0.5) * 0.02)
+    }), {});
+    localStorage.setItem('cryptoPrices', JSON.stringify(prices));
+    renderTokens();
+}, 3000);
+
+renderTokens();
+    </script>
+</body>
+</html>
